@@ -79,3 +79,74 @@ An S-expression and a list
 `(a)`
 ### What is `(cons s l)` where `s` is `a` and `l` is `b`
 Error, the second argument of `cons` must be a list
+
+### What is `(cons s (car l))` where `s` is `a` and `l` is ((b) c d)
+`(a b)`
+
+### What is `(cons s (cdr l))` where `s` is `a` and `l` is `((b) c d)`
+`(a c d)`
+
+### Is it true that the list `l` is the `null` list where l is `()`
+Yes
+
+### What is `(null? (quote ()))`
+True
+
+### Is `(null? l)` `true` or `false` where `l` is `(a b c)`
+False
+
+### Is `(null? a)` `true` or `false` where `a` is `spaghetti`
+No answer, you cannot ask `null?` of an atom
+
+## atom?
+### Is it `true` or `false` that `s` is an atom where `s` is `Harry`
+True
+
+### Is `(atom? s)` `true` or `false` where `s` is `Harry`
+True
+
+### Is `(atom? s)` `true` or `false` where `s` is `(Harry had a heap of apples)`
+False
+
+### How many arguments does `atom?` take and what are they?
+`atom?` takes a S-Expression as the single argument
+
+### Is `(atom? (car l))` `true` or `false` where `l` is `(Harry had a heap of apples)`
+True
+
+### Is `(atom? (cdr l))` `true` or `false` where `l` is `(Harry had a heap of apples)`
+False
+
+### Is `(atom? (cdr l))` `true` or `false` where `l` is `(Harry)`
+False
+
+### Is `(atom? (car (cdr l)))` `true` or `false` where `l` is `(swing low sweet cherry oat)
+True, `(car (cdr l))` => `low`
+
+### Is `(atom? (car (cdr l)))` `true` or `false` where `l` is `(swing (low sweet)cherry oat)
+False, `(car (cdr l))` => `(low sweet)`
+
+## Eq?
+### Is `(eq? a1 a2)` `true` or `false` where `a1` is `Harry` and `a2` is `Harry`
+True
+
+### Is `(eq? a1 a2)` `true` or `false` where `a1` is `margarine` and `a2` is `butter`
+False
+
+### How many arguments does eq? take and what are they?
+`eq?` takes 2 non-numeric atoms as arguments
+
+### Is `(eq? l1 l2)` `true` or `false` where `l1` is `()` and `l2` is `(strawberry)`
+No answer, since `l1` and `l2` are lists
+
+### Is `(eq? n1 n2)` `true` or `false` where `n1` is `6` and `n2` is `7`
+No answer since `n1` and `n2` are numbers
+
+### Is `(eq? (car l) a)` `true` or `false` where `l` is `(Mary had a little lamb chop)` and `a` is `Mary`
+True
+
+### Is `(eq? (cdr l) a)` `true` or `false` where `l` is `(soured milk)` and `a` is  `milk`
+No answer, because `(cdr l)` => `(milk)` != `milk`
+
+### Is `(eq? (car l) (car (cdr l)))` `true` or `false` where `l` is `(beans beans we need jelly beans)`
+True, `(car l)` => `beans` and `(car (cdr l))` => `beans`
