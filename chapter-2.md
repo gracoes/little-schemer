@@ -115,10 +115,40 @@ Asks if the first element of `lat` is equal to `a`, if not call `member?` on the
 ### True or false:
 ```
 (or (eq? (car lat) a)
-    (member? a (cdr lat)))
+      (member? a (cdr lat)))
 ``` 
 ### where a is meat and lat is (mashed potatoes and meat gravy)
 True
+
+### Is `(eq? (car lat) a)` true or false where a is meat and `lat` is `(mashed potatoes and meat gravy)`
+False
+
+### What is the second question of (or . .. )
+`(member? a (cdr lat))`
+
+### Now what are the arguments of member?
+An atom and a list of atoms, this case the atom `meat` and the list `(potatoes and meat gravy)`
+
+### What is the next question?
+`(null? lat)`
+
+### What do we do now?
+Ask the next question since `lat` is not null
+
+### What is the next question?
+`else`
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
