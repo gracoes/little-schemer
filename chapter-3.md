@@ -55,9 +55,39 @@ We call `(rember a (cdr lat))`
 		(cond
 			((null? lat) ('()))
 			(else (cond
-							((eq? (car lat) a) (cdr lat))
-							(else (rember a
-											(cdr lat))))))))
+					((eq? (car lat) a) (cdr lat))
+					(else (rember a
+							(cdr lat))))))))
 ```
 ### What is the value of `(rember a lat)` where `a` is bacon and `lat` is (bacon lettuce and tomato)
 `(lettuce and tomato)`
+
+### Now, let's see if this function works. What is the first question?
+`(null? lat)`
+
+### What do we do now?
+Ask another question, else
+
+### What next?
+`(eq? (car lat) a)`
+
+### (eq? (car lat) a)
+Yes
+
+### Is this the correct value?
+Yes
+
+### But did we really use a good example?
+No
+
+### What does rember do?
+Removes the first occurrence of `a` in `lat` by returning `lat` without `a`
+
+### What do we do now?
+We compare each atom of the lat with the
+atom a, and if the comparison fails we build
+a list that begins with the atom we just
+compared.
+
+### What is the value of `(rember a lat)` where `a` is and and `lat` is (bacon lettuce and tomato)
+`(bacon lettuce tomato)`
