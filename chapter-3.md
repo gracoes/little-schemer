@@ -89,5 +89,69 @@ atom a, and if the comparison fails we build
 a list that begins with the atom we just
 compared.
 
-### What is the value of `(rember a lat)` where `a` is and and `lat` is (bacon lettuce and tomato)
+### What is the value of `(rember a lat)` where `a` is `and` and `lat` is (bacon lettuce and tomato)
 `(bacon lettuce tomato)`
+
+###  Let us see if our function `rember` works. What is the first question asked by `rember`?
+`(null? lat)`
+
+### What do we do now?
+`lat` is not null so we ask the next question, `else`
+
+### `(eq? (car lat) a)`
+No
+
+### What is the meaning of `(else (rember a (cdr lat))`
+Return the result of calling `rember` on the rest of `lat` -> `(rember 'and '(lettuce and tomato)`
+
+### `(null? lat)`
+No
+
+### `(eq? (car lat) a)`
+`(eq? 'lettuce 'and)` -> False
+
+### What is the meaning of `(rember a (cdr lat))`
+Call `rember` on the rest of `lat` -> `(rember 'and '(and tomato))`
+
+### `(null? lat)`
+No
+
+### (eq? (car lat) a)
+`(eq? 'and 'and)` -> True
+
+### So what is the result?
+`'(tomato)`
+
+### Is this correct?
+No
+
+### What did we do wrong?
+We didn't save all the atoms that were not `a`
+
+### How can we keep from losing the atoms `bacon` and `lettuce`
+We use `cons` to build lists
+
+### Let's see what happens when we use `cons`
+```
+(define rember
+  (lambda (a lat)
+    (cond
+      ((null? lat) '())
+      (else (cond
+              ((eq? (car lat) a) (cdr lat))
+              (else (cons (car lat)
+                      (rember a
+                      (cdr lat))))))))
+```
+
+### What is the value of `(rember a lat)` where `a` is `and` and `lat` is `(bacon lettuce and tomato)`
+`'(bacon lettuce tomato)`
+
+
+
+
+
+
+
+
+
