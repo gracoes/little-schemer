@@ -137,15 +137,103 @@ We use `cons` to build lists
   (lambda (a lat)
     (cond
       ((null? lat) '())
-      (else (cond
-              ((eq? (car lat) a) (cdr lat))
-              (else (cons (car lat)
-                      (rember a
-                      (cdr lat))))))))
+      ((eq? (car lat) a) (cdr lat))
+      (else (cons (car lat)
+              (rember a (cdr lat)))))))
+
 ```
 
 ### What is the value of `(rember a lat)` where `a` is `and` and `lat` is `(bacon lettuce and tomato)`
 `'(bacon lettuce tomato)`
+
+###  What is `(firsts l)` where `l` is ((apple peach pumpkin) (plum pear cherry) (grape raisin pea) (bean carrot eggplant))
+`(apple plum grape bean)`
+
+### What is `(firsts l)` where `l` is ((a b) (c d) (e f))
+`(a c e)`
+
+### What is `(firsts l)` where `l` is ()
+`()`
+
+### What is `(firsts l)` where `l` is ((five plums) (four) (eleven green oranges))
+`(five four eleven)`
+
+### What is `(firsts l)` where `l` is (((five plums) four) (eleven green oranges) ((no) more))
+`((five plums) eleven (no))``
+
+### In your own words, what does `(firsts l)` do?
+`firsts` takes a list `l` where every element is a list.
+It builds another list containing the first S-expression of each list.
+
+### See if you can write the function `firsts`. Remember the Commandments!
+(define firsts
+  (lambda l
+    (cond
+      ((null? l) '())
+      (else (cons (car l) (firsts (cdr l)))))))
+
+###  Keeping in mind the definition of `(firsts l)` what is a typical element of the value of `(firsts l)`
+### where `l` is ((a b) (c d) (e f))
+`a`
+
+### What is another typical element?
+`e`
+
+### Consider the function `seconds`.
+### What would be a typical element of the value of (seconds l) where `l` is ((a b) (c d) (e f))
+`d`
+
+### How do we describe a typical element for (firsts l)
+It's the first S-expression in one of `l` internal lists.
+
+### When we find a typical element of (firsts l) what do we do with it?
+We `cons` into our returning list.
+
+###  What does (firsts l) do
+```
+(define firsts
+  (lambda (l)
+    (cond
+      ((null? l) ...)
+      (else (cons (car (car l))
+              (firsts (cdr l)))))))
+```
+### where l is ((a b) (c d) (e f))
+It returns the list `(a c e)`
+
+### What do we need to `cons` atoms onto?
+A list
+
+### For the purpose of consing, what value can we give when (null? l) is true?
+The empty list, `()`
+
+### With `() as a value, we now have three cons steps to go back and pick up. We need to:
+### I. either
+###      1. cons e onto ()
+###      2. cons c onto the value of 1
+###      3. cons a onto the value of 2
+### II. or
+###      1. cons a onto the value of 2
+###      2. cons c onto the value of 3
+###      3. cons e onto ()
+### III. or
+###      cons a onto
+###      the cons of c onto the cons of e onto
+###      ()
+### In any case, what is the value of (firsts l)
+`(a c e)`
+
+###  With which of the three alternatives do you feel most comfortable?
+I
+
+### What is (insertR new old lat) where `new` is `topping` `old` is `fudge` and `lat` is (ice cream with fudge for dessert)
+`(ice cream with fudge topping for desert)`
+
+### (insertR new old lat) where `new` is `jalapeno` `old` is `and` and lat is (tacos tamales and salsa)
+`(tacos tamales and jalapeno salsa)`
+
+### (insertR new old lat) where `new` is `e` `old` is `d` and lat is (a b c d f g d h)
+`(a b c d e f g h)`
 
 
 
