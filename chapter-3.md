@@ -235,6 +235,73 @@ I
 ### (insertR new old lat) where `new` is `e` `old` is `d` and lat is (a b c d f g d h)
 `(a b c d e f g h)`
 
+### In your own words, what does `(insertR new old lat)` do?
+insertR receives 3 arguments, 2 atoms (`new` and `old`) an a list of atoms `lat`, and builds a list with
+all the elements of `lat` and adding `new` to the right of `old`.
+
+### See if you can write the first three lines of the function `insertR`
+```
+(define insertR
+  (lambda (new old lat)
+    (cond ...)))
+```
+
+### Which argument changes when we recur with `insertR``
+`lat`
+
+### How many questions can we ask about the lat?
+Two.
+A lat is either the null list or a non-empty list of atoms.
+
+### Which questions do we ask?
+First, we ask `(null? lat)`.
+Second, we ask `else`, because `else` is always the last question.
+
+### What do we know if (null? lat) is not true?
+That `lat` is not an empty list
+
+### Which questions do we ask about the first element?
+If it is equal to `old` => `(eq? (car lat) old)`
+
+###  Now see if you can write the whole function `insertR`
+```
+(define insertR
+  (lambda (new old lat)
+    (cond
+      ((null? lat) '())
+      (else
+        (cond
+          ((eq? (car lat) old)
+            (cons
+              old
+              (cons new (cdr lat))))
+          (else
+            (cons
+              (car lat)
+              (insertR new old (cdr lat))))
+        )
+      )
+    )
+  )
+)
+```
+
+### What is the value of the application `(insertR new old lat)` that we just determined
+### where `new` is `topping` `old` is `fudge` and `lat` is `(ice cream with fudge for dessert)`
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
