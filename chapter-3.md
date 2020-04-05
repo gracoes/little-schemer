@@ -286,13 +286,76 @@ If it is equal to `old` => `(eq? (car lat) old)`
 )
 ```
 
-### What is the value of the application `(insertR new old lat)` that we just determined
-### where `new` is `topping` `old` is `fudge` and `lat` is `(ice cream with fudge for dessert)`
+### Now try insertL
+### Hint: insertL inserts the atom `new` to the left of the first occurrence of the atom `old` in `lat``
+(define insertL
+  (lambda (new old lat)
+    (cond
+      ((null? lat) '())
+      (else
+        (cond
+          ((eq? (car lat) old)
+            (cons new lat)
+          (else
+            (cons
+              (car lat)
+              (insertL new old (cdr lat)))
+          )
+        )
+      )
+    )
+  )
+)
 
+### Now try `subst`
+### Hint: (subst new old lat) replaces the first occurrence of `old` in the lat with `new`.
+### For example, where new is topping old is fudge and lat is (ice cream with fudge for dessert)
+### the value is (ice cream with topping for dessert).
+### Now you have the idea.
+(define subst
+  (lambda (new old lat)
+    (cond
+      ((null? lat) '())
+      (else
+        (cond
+          ((eq? (car lat) old)
+            (cons new (cdr lat)))
+          (else
+            (cons
+              (car lat)
+              (subst new old (cdr lat))
+          )
+        )
+      )
+    )
+  )
+)
 
-
-
-
+### Now try `subst2`
+### Hint: (subst2 new o1 o2 lat) replaces either the first occurrence of o1 or the first occurrence of o2 by `new`
+### For example, where new is vanilla o1 is chocolate o2 is banana and `lat` is (banana ice cream with chocolate topping)
+### the value is (vanilla ice cream with chocolate topping)
+(define subst2
+  (lambda (new o1 o2 lat)
+    (cond
+      ((null? lat) '())
+      (else
+        (cond
+          ((or
+            (eq? (car lat) o1)
+            (eq? (car lat) o2))
+              (cons new (cdr lat)))
+          (else
+            (cons
+              (car lat)
+              (subst2 new o1 o2 (cdr lat))
+            )
+          )
+        )
+      )
+    )
+  )
+)
 
 
 
