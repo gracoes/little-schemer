@@ -357,13 +357,120 @@ If it is equal to `old` => `(eq? (car lat) old)`
   )
 )
 
+###  Write the function `multirember` which gives as its final value the lat with all occurrences of a removed.
+### Consider the example where `a` is `cup` and `lat` is (coffee cup tea cup and hick cup)
+```
+(define multirember
+  (lambda (a lat)
+    (cond
+      ((null? lat) '())
+      ((eq? (car lat) a) (multirember a (cdr lat)))
+      (else
+        (cons
+          (car lat)
+          (multirember a (cdr lat))
+        )
+      )
+    )
+  )
+)
+```
+
+### Now write the function `multiinsertR`
+```
+(define multiinsertR
+  (lambda (new old lat)
+    (cond
+      ((null? lat) '())
+      (else
+        (cond
+          ((eq? (car lat) old)
+            (cons
+              old
+              (cons
+                new
+                (multiinsertR new old (cdr lat))
+              )
+            )
+          )
+          (else
+            (cons (car lat) (multiinsertR new old (cdr lat)))
+          )
+        )
+      )
+    )
+  )
+)
+```
+
+### Is this function defined correctly?
+```
+(define multiinsertL
+  (lambda (new old lat)
+    (cond
+      ((null? lat) '())
+      (else
+        (cond
+          ((eq? (car lat) old)
+            (cons
+              new
+              (cons
+                old
+                (multiinsertL new old lat))))
+          (else
+            (cons
+              (car lat)
+              (multiinsertL new old (cdr lat)))))))))
+```
+No, if the second condition is true the function never reaches a terminal condition because `lat` doesn't change.
 
 
+###  Now, try to write the function `multiinsertL` again
+```
+(define multiinsertL
+  (lambda (new old lat)
+    (cond
+      ((null? lat) '())
+      (else
+        (cond
+          ((eq? (car lat) old)
+            (cons
+              new
+              (cons
+                old
+                (multiinsertL new old (cdr lat)))
+            )
+          )
+          (else
+            (cons (car lat) (multiinsertL new old (cdr lat)))
+          )
+        )
+      )
+    )
+  )
+)
+```
 
-
-
-
-
+### Now write the function `multisubst`
+```
+(define multisubst
+  (lambda (new old lat)
+    (cond
+      ((null? lat) '())
+      (else
+        (cond
+          ((eq? (car lat) old)
+            (cons new (multisubst new old (cdr lat)))
+          )
+          (else
+            (cons (car lat) (multisubst new old (cdr lat)))
+          )
+        )
+      )
+    )
+  )
+)
+```
 
 
 
