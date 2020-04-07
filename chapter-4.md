@@ -244,7 +244,8 @@ Yes
 (define tup+
   (lambda (tup1 tup2)
     (cond
-      ((and (null? tup1) (null? tup2)) '())
+      ((null? tup1) tup2)
+      ((null? tup2) tup1)
       (else
         (cons
           (myadd (car tup1) (car tup2))
@@ -256,12 +257,229 @@ Yes
 )
 ```
 
+### What is (> 12 133)?
+False
 
+### What is (> 120 11)?
+True
 
+### On how many numbers do we have to recur?
+Two
 
+### How do we recur?
+`(sub1 n)` and `(sub1 m)`
 
+### When do we recur?
+When none of the numbers are zero
 
+### How many questions do we have to ask about `n` and `m`?
+Three, `(zero? n)` `(zero? m)` `else`
 
+### Can you write the function `>` now using `zero?` and `sub1`
+```
+(define >
+  (lambda (n m)
+    (cond
+      ((zero? n) #f)
+      ((zero? m) #t)
+      (else
+        (> (sub1 n) (sub1 m))
+      )
+    )
+  )
+)
+```
 
+### Is the way we wrote (> n m) correct?
+It doesn't work for negative numbers
 
+### What is (< 4 6)?
+True
+
+### Now try to write `<`
+(define <
+  (lambda (n m)
+    (cond
+      ((zero? m) #f)
+      ((zero? n) #t)
+      (else
+        (< (sub1 n) (sub1 m))
+      )
+    )
+  )
+)
+
+### Here is the definition of `=`
+```
+(define =
+  (lambda (n m)
+    (cond
+      ((zero? m) (zero? n))
+      ((zero? n) #f)
+      (else (= (subl n) (subl m))))))
+```
+### Rewrite `=` using `<` and `>`
+(define =
+  (lambda (n m)
+    (cond
+      ((> n m) #f)
+      ((< n m) #f)
+      (else #t)
+    )
+  )
+)
+
+### Does this mean we have two different functions for testing equality of atoms?
+Yes, `=` for numbers and `eq?` for the others
+
+### `(expt 1 1)`
+1
+
+### `(expt 2 3)`
+8
+
+### `(expt 5 3)`
+125
+
+### Now write the function `expt`
+(define expt
+  (lambda (n m)
+    (cond
+      ((zero? n) 0)
+      ((zero? m) 1)
+      (else
+        (x n (expt n (sub1 m)))
+      )
+    )
+  )
+)
+
+### What is a good name for this function?
+```
+(define ???
+  (lambda (n m)
+  (cond
+    ((< n m) 0)
+    (else (add1 (??? (- n m) m))))))
+```
+Division
+
+### What does the first question check?
+Sees if `n` is less than `m`
+
+### And what happens in the second line?
+We add 1 to the result of ??? with `(n - m)` and `m` as arguments
+
+### So what does the function do?
+It subtracts `m` to `n` until `n` is less than `m`
+
+### And what do we call this?
+Division
+```
+(define quotient
+  (lambda (n m)
+    (cond
+      ((< n m) 0)
+      (else
+        (add1 (quotient (- n m) m))
+      )
+    )
+  )
+)
+```
+
+### What is `(quotient 15 4)`?
+3
+
+###  What is the value of `(length lat)` where `lat` is (hotdogs with mustard sauerkraut and pickles)
+6
+
+###  What is `(length lat)` where `lat` is (ham and cheese on rye)
+5
+
+### Now try to write the function length
+```
+(define length
+  (lambda (lat)
+    (cond
+      ((null? lat) 0)
+      (else
+        (add1 (length (cdr lat)))
+      )
+    )
+  )
+)
+```
+
+###  What is `(pick n lat)` where `n` is 4 and `lat` is (lasagna spaghetti ravioli macaroni meatball)
+`macaroni`
+
+### What is `(pick 0 lat)` where `lat` is (a)
+No answer
+
+### Try to write the function `pick`
+```
+(define pick
+  (lambda (n lat)
+    (cond
+      ((null? lat) '())
+      ((zero? (sub1 n)) (car lat))
+      (else
+        (pick (sub1 n) (cdr lat))
+      )
+    )
+  )
+)
+```
+
+### What is `(rempick n lat)` where `n` is 3 and `lat` is (hotdogs with hot mustard)
+`(hotdogs with mustard)`
+
+### Now try to write `rempick`
+```
+(define rempick
+  (lambda (n lat)
+    (cond
+      ((null? lat) '())
+      ((zero? (sub1 n)) (cdr lat))
+      (else
+        (cons
+          (car lat)
+          (rempick (sub1 n) (cdr lat))
+        )
+      )
+    )
+  )
+)
+```
+
+### Is `(number? a)` true or false where `a` is tomato
+False
+
+### Is (number? 76) true or false?
+True
+
+### Can you write `number?` which is true if its argument is a numeric atom and false if it is anthing else?
+No, because `number?` is a primitive function
+
+### Now using number? write the function no-nums which gives as a final value a lat obtained by removing all the numbers from the lat.
+## For example, where `lat` is (5 pears 6 prunes 9 dates) the value of `(no-nums lat)` is (pears prunes dates)
+```
+(define no-nums
+  (lambda (lat)
+    (cond
+      ((null? lat) '())
+      ((number? (car lat))
+        (no-nums (cdr lat))
+      )
+      (else
+        (cons
+          (car lat)
+            (no-nums (cdr lat))
+        )
+      )
+    )
+  )
+)
+```
 
