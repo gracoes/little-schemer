@@ -462,7 +462,7 @@ True
 ### Can you write `number?` which is true if its argument is a numeric atom and false if it is anthing else?
 No, because `number?` is a primitive function
 
-### Now using number? write the function no-nums which gives as a final value a lat obtained by removing all the numbers from the lat.
+### Now using `number?` write the function `no-nums` which gives as a final value a lat obtained by removing all the numbers from the lat.
 ## For example, where `lat` is (5 pears 6 prunes 9 dates) the value of `(no-nums lat)` is (pears prunes dates)
 ```
 (define no-nums
@@ -483,3 +483,87 @@ No, because `number?` is a primitive function
 )
 ```
 
+### Now write `all-nums` which extracts a tup from a lat using all the numbers in the lat.
+```
+(define all-nums
+  (lambda (lat)
+    (cond
+      ((null? lat) '())
+      ((number? (car lat))
+        (cons
+          (car lat)
+          (all-nums (cdr lat))
+        )
+      )
+      (else
+        (all-nums (cdr lat))
+      )
+    )
+  )
+)
+```
+
+### Write the function `eqan?` which is true if its two arguments (a1 and a2) are the same atom.
+### Remember to use `=` for numbers and `eq?` for all other atoms.
+```
+(define eqan?
+  (lambda (a1 a2)
+    (cond
+      ((and (number? a1) (number? a2)) (= a1 a2))
+      ((or (number? a1) (number? a2)) #f)
+      (else
+        (eq? a1 a2)
+      )
+    )
+  )
+)
+```
+
+### Can we assume that all functions written using `eq?` can be generalized by replacing `eq?` by `eqan`?
+Yes
+
+### Now write the function `occur` which counts the number of times an atom `a` appears in a `lat``
+```
+(define occur
+  (lambda (a lat)
+    (cond
+      ((null? lat) 0)
+      ((eq? (car lat) a)
+        (add1 (occur a (cdr lat)))
+      )
+      (else
+        (occur a (cdr lat))
+      )
+    )
+  )
+)
+```
+
+### Write the function one? where (one? n) is #t if n is 1 and #f (Le., false) otherwise.
+```
+(define one?
+  (lambda (n)
+    (= 1 n)
+  )
+)
+```
+
+### Now rewrite the function `rempick2` that removes the nth atom from a lat.
+### For example, where n is 3 and lat is (lemon meringue salty pie) the value of (rempick n lat) is (lemon meringue pie)
+### Use the function `one?` in your answer.
+```
+(define rempick2
+  (lambda (n lat)
+    (cond
+      ((null? lat) '())
+      ((one? n) (cdr lat))
+      (else
+        (cons
+          (car lat)
+          (rempick2 (sub1 n) (cdr lat))
+        )
+      )
+    )
+  )
+)
+```
