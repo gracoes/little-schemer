@@ -360,14 +360,58 @@ as the second argument may be an atom or a list of S-expresssions.
     (cond
       ((and (null? l1) (null? l2)) #t)
       ((or (null? l1) (null? l2)) #f)
-      ((equal? l1 l2) #t)
       (else
         (and
-          (eqlist? (car l1) (car l2))
-          (eqlist? (cdr l1) (cdr l2))
+          (equal? (car l1) (car l2))
+          (equal? (cdr l1) (cdr l2))
         )
       )
     )
   )
 )
 ```
+
+### Here is `rember` after we replace `lat` by a list `l` of S-expressions and `a` by any S-expression.
+```
+(define rember
+  (lambda (s l)
+    (cond
+      ((null? l) '())
+      ((atom? (car l))
+        (cond
+          ((equal? (car l) s) (cdr l))
+          (else
+            (cons (car l) (rember s (cdr l))))))
+      (else
+        (cond
+          ((equal? (car l) s) (cdr l))
+          (else
+            (cons (car l) (rember s (cdr l)))))))))
+```
+### Can we simplify it?
+```
+(define rember
+  (lambda (s l)
+    ((null? l) '())
+    ((equal? (car l) s) (cdr l))
+    (else
+      (cons (car l) (rember s (cdr l)))
+    )
+  )
+)
+```
+
+### And how does that differ?
+The function `rember` now removes the first matching S-expression `s` in `l`,
+instead of the first matching atom `a` in `lat`.
+
+### Is rember a "star" function now?
+No because it recurs with `cdr` of `l` only.
+
+### Simplify `insertL*`
+We can't. Before we can ask `(eq? (car l) old)` we need to know that `(car l)` is an atom.
+
+### Can all functions that use `eq?` and `=` be generalized by replacing `eq?` and `=` by the function equal?
+Not quite.
+This won't work for `eqan?`, but will work for all others.
+In fact, disregarding the trivial example of `eqan?`, that is exactly what we shall assume.
