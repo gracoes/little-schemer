@@ -389,3 +389,18 @@ It won't work if n is zero, but thats fine (see The Law of Cdr)
 
 ### Has the definition of `myadd` changed?
 Yes and no. It changed, but only slightly.
+
+###  Recall `lat?``
+`lat?` is a function that takes a list and checks if it is a list of atoms.
+
+### Do you remember what the value of `(lat? ls)` is where ls is (1 2 3)
+True
+
+### What is (1 2 3) with our new numbers?
+`((()) (() ()) (() () ())`
+
+### What is `(lat? ls)` where ls is ((()) (()()) (()()()))
+False
+
+### Is that bad?
+You must beware of shadows (representations).
