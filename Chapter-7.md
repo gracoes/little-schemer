@@ -75,3 +75,17 @@ False, beacuse the atoms `4` and `of` of `set1` are not in `set2`
 )
 ```
 
+### What is `(eqset? set1 set2)` where
+### `set1` is (6 large chickens with wings) and
+### `set2` is (6 chickens with large wings)
+True
+
+### Write `eqset?`
+```
+(define eqset?
+  (lambda (set1 set2)
+    (and (subset? set1 set2) (subset? set2 set1))
+  )
+)
+```
+
