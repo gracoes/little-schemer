@@ -89,3 +89,106 @@ True
 )
 ```
 
+### What is `(intersect? set1 set2)` where
+### `set1` is (stewed tomatoes and macaroni) and
+### `set2` is (macaroni and cheese)
+True because atleast one of the atoms in `set1` is present in `set2`
+
+### Define `intersect?`
+```
+(define intersect?
+  (lambda (set1 set2)
+    (cond
+      ((null? set1) #f)
+      (else
+        (or (member? (car set1) set2) (intersect (cdr set1) set2))
+      )
+    )
+  )
+)
+```
+
+### What is `(intersect set1 set2)` where
+### `set1` is (stewed tomatoes and macaroni) and
+### `set2` is (macaroni and cheese)
+`(and macaroni)`
+
+### Now you can write the short version of `intersect`
+```
+(define intersect
+  (lambda (set1 set2)
+    (cond
+      ((null? set1) '())
+      ((member? (car set1) set2)
+        (cons (car set1) (intersect (cdr set1) set2))
+      )
+      (else
+        (intersect (cdr set1) set2)
+      )
+    )
+  )
+)
+```
+
+### What is `(union set1 set2)` where
+### `set1` is (stewed tomatoes and macaroni casserole) and
+### `set2` is (macaroni and cheese)
+`(stewed tomatoes casserole macaroni and cheese)`
+
+### Write `union`
+```
+(define union
+  (lambda (set1 set2)
+    (cond
+      ((null? set1) set2)
+      ((member? (car set1) set2)
+        (union (cdr set1) set2))
+      (else
+        (cons
+          (car set1)
+          (union (cdr set1) set2)
+        )
+      )
+    )
+  )
+)
+```
+
+### What is this function?
+```
+(define xxx
+  (lambda (set1 set2)
+    (cond
+      ((null? set1) '())
+      ((member? (car set1) set2)
+        (xxx (cdr set1) set2))
+      (else
+        (cons
+          (car set1)
+          (xxx (cdr set1) set2))))))
+```
+
+It is a function that returns all the atoms
+in `set1` that are not in `set2`.
+That is, `xxx` is the (set) difference (-) function.
+
+### What is `(intersectall l-set)` where `l-set` is ((a b c) (c a d e) (e f g h a b))
+`(a)`
+
+### What is `(intersectall l-set)` where
+### `l-set` is ((6 pears and) (3 peaches and 6 peppers) (8 pears and 6 plums) (and 6 prunes with some apples))
+`(6 and)`
+
+### Now, using whatever help functions you need, write `intersectall` assuming that the list of sets is non-empty
+```
+(define intersectall
+  (lambda (l-set)
+    (cond
+      ((null? (cdr l-set)) (car l-set))
+      (else
+        (intersect (car l-set) (intersectall (cdr l-set)))
+      )
+    )
+  )
+)
+```
