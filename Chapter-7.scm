@@ -101,3 +101,79 @@
     )
   )
 )
+
+(define a-pair?
+  (lambda (l)
+    (cond
+      ((null? l) #f)
+      ((atom? l) #f)
+      (else
+        (eq? (length l) 2)
+      )
+    )
+  )
+)
+
+(define first
+  (lambda (p)
+    (car p)
+  )
+)
+
+(define second
+  (lambda (p)
+    (car (cdr p))
+  )
+)
+
+(define build
+  (lambda (s1 s2)
+    (cons s1 (cons s2 '()))
+  )
+)
+
+(define fun?
+  (lambda (rel)
+    (set? (firsts rel))
+  )
+)
+
+(define revrel
+  (lambda (rel)
+    (cond
+      ((null? rel) '())
+      (else
+        (cons
+          (build (second (car rel)) (first (car rel)))
+          (revrel (cdr rel))
+        )
+      )
+    )
+  )
+)
+
+(define seconds
+  (lambda (rel)
+    (cond
+      ((null? rel) '())
+      (else
+        (cons
+          (second (car rel))
+          (seconds (cdr rel))
+        )
+      )
+    )
+  )
+)
+
+(define fullfun?
+  (lambda (fun)
+    (set? (seconds fun))
+  )
+)
+
+(define one-to-one?
+  (lambda (fun)
+    (fun? (revrel fun))
+  )
+)

@@ -192,3 +192,245 @@ That is, `xxx` is the (set) difference (-) function.
   )
 )
 ```
+
+### Is this a pair? (pear pear)
+Yes, because it is a list with only two atoms.
+
+###  Is this a pair? (3 7)
+Yes, because it is a list with only two numbers.
+
+### Is this a pair? ((2) (pair))
+Yes, because it is a list with two S-expressions
+
+### `(a-pair? l)` `l`  where is (full (house))
+True
+
+### Define `a-pair?`
+```
+(define a-pair?
+  (lambda (l)
+    (cond
+      ((null? l) #f)
+      ((atom? l) #f)
+      (else
+        (eq? (length l) 2)
+      )
+    )
+  )
+)
+```
+
+### How can you refer to the first S-expression of a pair?
+`car` of pair
+
+### How can you refer to the second S-expression of a pair?
+`car` of `cdr` of pair
+
+### How can you build a pair with two atoms?
+`cons` the first atom into the `cons` of the second one with the empty list.
+`(cons x1 (cons x2 '()))`
+
+### How can you build a pair with two S-expressions?
+`cons` the first S-expression into the `cons` of the second one with the empty list.
+
+### Did you notice the differences between the last two answers?
+Nope
+
+### What possible uses do these three functions have?
+```
+(define first
+  (lambda (p)
+    (cond
+      (else (car p)))))
+
+(define second
+  (lambda (p)
+    (cond
+      (else (car (cdr p))))))
+
+(define build
+  (lambda (s1 s2)
+    (cond
+      (else (cons s1
+              (cons s2 '())))))
+```
+Obtain the first element of the pair, obtain the second element of the pair and build a pair from two S-expressions.
+
+### Redefine first, second, and build as one-liners
+```
+(define first
+  (lambda (p)
+    (car p)
+  )
+)
+
+(define second
+  (lambda (p)
+    (car (cdr p))
+  )
+)
+
+(define build
+  (lambda (s1 s2)
+    (cons s1 (cons s2 '()))
+  )
+)
+```
+
+### Can you write third as a one-liner?
+```
+(define third
+  (lambda (l)
+    (car (cdr (cdr l)))
+  )
+)
+```
+
+### Is `l` a rel where `l` is (apples peaches pumpkin pie)
+No, since `l` is not a list of pairs. We use rel to stand for relation.
+
+### Is `l` a rel where `l` is ((apples peaches) (pumpkin pie) (apples peaches))
+No, since `l` is not a set of pairs.
+
+### Is `l` a rel where `l` is ((apples peaches) (pumpkin pie))
+Yes, since `l` is a set of pairs.
+
+### Is `l` a rel where `l` is ((4 3) (4 2) (7 6) (6 2) (3 4))
+Yes, since `l` is a set of pairs.
+
+### Is `rel` a fun where `rel` is ((4 3) (4 2) (7 6) (6 2) (3 4))
+No. We use fun to stand for function
+
+### What is `(fun? rel)` where `rel` is ((8 3) (4 2) (7 6) (6 2) (3 4))
+#t, because `(firsts rel)` is a set
+
+### What is `(fun? rel)` where `rel` is ((d 4) (b 0) (b 9) (e 5) (g 4))
+False, because `(firsts rel)` is not a set (`b` is repeated)
+
+### Write `fun?` with `set?` and `firsts`
+```
+(define fun?
+  (lambda (rel)
+    (set? (firsts rel))
+  )
+)
+```
+
+### How do we represent a finite function?
+For us, a finite function is a list of pairs
+in which no first element of any pair is the same as any other first element.
+
+### What is `(revrel rel)` where `rel` is ((8 a) (pumpkin pie) (got sick))
+`((a 8) (pie pumpkin) (sick got))`
+
+### You can now write `revrel`
+```
+(define revrel
+  (lambda (rel)
+    (cond
+      ((null? rel) '())
+      (else
+        (cons
+          (build (second (car rel)) (first (car rel)))
+          (revrel (cdr rel))
+        )
+      )
+    )
+  )
+)
+```
+
+### Would the following also be correct:
+```
+(define revrel
+  (lambda (rel)
+    (cond
+      ((null? rel) '())
+      (else
+        (cons
+          (cons
+              (car (cdr (car rel)))
+              (cons
+                (car (car rel)) '())
+          (revrel (cdr rei)))))))
+```
+Yes, it's the same without using `first`, `second` and `build`
+
+### Suppose we had the function revpair that reversed the two components of a pair like this:
+```
+(define revpair
+  (lambda (p)
+    (build (second p) (first p))
+  )
+)
+```
+### How would you rewrite `revrel` to use this help function?
+```
+(define revrel
+  (lambda (rel)
+    (cond
+      ((null? rel) '())
+      (else
+        (cons
+          (revpair (car rel))
+          (revrel (cdr rel))
+        )
+      )
+    )
+  )
+)
+```
+
+
+### Can you guess why `fun` is not a fullfun where `fun` is ((8 3) (4 2) (7 6) (6 2) (3 4))
+Because the `2` appears more than once as a second item of a pair.
+
+### Why is `#t` the value of `(fullfun? fun)` where `fun` is ((8 3) (4 8) (7 6) (6 2) (3 4))
+`fun` is a fullfun since no second item of a pair appears more than once.
+
+### What is `(fullfun? fun)` where `fun` is ((grape raisin) (plum prune) (stewed prune))
+False
+
+### What is `(fullfun? fun)` where `fun` is ((grape raisin) (plum prune) (stewed grape))
+True
+
+### Define fullfun?
+```
+(define fullfun?
+  (lambda (fun)
+    (set? (seconds fun))
+  )
+)
+```
+
+### Can you define `seconds`
+```
+(define seconds
+  (lambda (rel)
+    (cond
+      ((null? rel) '())
+      (else
+        (cons
+          (second (car rel))
+          (seconds (cdr rel))
+        )
+      )
+    )
+  )
+)
+```
+
+### What is another name for `fullfun?``
+`one-to-one?`
+
+### Can you think of a second way to write `one-to-one?`
+```
+(define one-to-one?
+  (lambda (fun)
+    (fun? (revrel fun))
+  )
+)
+```
+
+### Is ((chocolate chip) (doughy cookie)) a one-to-one function?
+You bet
