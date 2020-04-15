@@ -9,3 +9,6 @@ No, because we have not yet told you how.
 
 ### How can you make rember-f use equal? instead of eq?
 By passing `equal?` to `rember-f` as an argument
+
+### What is `(rember-f test? a l)` where `test?` is `=` `a` is 5 and `l` is (6 2 5 3)
+`(6 2 3)`
