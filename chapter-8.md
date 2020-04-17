@@ -419,3 +419,182 @@ The function `+`
 
 ### Is this quite a bit shorter than the first version?
 Yes, quite a bit
+
+### Write multirember-f
+```
+(define multirember-f
+  (lambda (test?)
+    (lambda (a lat)
+      (cond
+        ((null? lat) '())
+        ((test? (car lat) a)
+          ((multirember-f test?) a (cdr lat)))
+        (else
+          (cons
+            (car lat)
+            ((multirember-f test?) a (cdr lat)))
+        )
+      )
+    )
+  )
+)
+```
+
+### What is `((multirember-f test?) a lat)` where `test?` is `eq?` `a` is tuna
+### and `lat` is (shrimp salad tuna salad and tuna)
+`(shrimp salad salad and)`
+
+### Define `multirember-eq?` using `multirember-f`
+`(define multirember-eq? (multirember-f eq?))`
+
+### Do we really need to tell `multirember-f` about tuna
+As `multirember-f` visits all the elements in `lat`, it always looks for tuna.
+
+### Does `test?` change as `multirember-f` goes through `lat``
+Nope
+
+### Can we combine `a` and `test?`
+Yes, with a function like
+```
+(define eq?-tuna
+  (lambda (a)
+    (eq?-c 'tuna)))
+```
+
+### Have you ever seen definitions that contain atoms?
+`zero?` for example
+
+###  Perhaps we should now write `multiremberT` which is similar to `multirember-f`
+### Instead of taking `test?` and returning a function,
+### `multiremberT` takes a function like `eq?-tuna` and a `lat` and then does its work.
+```
+(define multiremberT
+  (lambda (test? lat)
+    (cond
+      ((null? lat) '())
+      ((test? (car lat))
+        (multiremberT test? (cdr lat)))
+      (else
+        (cons
+          (car lat)
+          (multiremberT test? (cdr lat)))
+      )
+    )
+  )
+)
+```
+
+### What is `(multiremberT test? lat)` where `test?` is `eq?-tuna` and `lat` is (shrimp salad tuna salad and tuna)
+`(shrimp salad salad and)`
+
+### How about this?
+```
+(define multirember&co
+  (lambda (a lat col)
+    (cond
+      ((null? lat)
+        (col '() '()))
+      ((eq? (car lat) a)
+        (multirember&co
+          a
+          (cdr lat)
+          (lambda (newlat seen)
+            (col
+              newlat
+              (cons (car lat) seen)))))
+      (else
+        (multirember&co
+          a
+          (cdr lat)
+          (lambda (newlat seen)
+            (col
+              (cons (car lat) newlat)
+              seen)))))))
+```
+
+###  Here is something simpler:
+```
+(define a-friend
+  (lambda (x y)
+    (null? y)))
+```
+
+### What is the value of `(multirember&co a lat col)` where `a` is tuna
+### `lat` is (strawberries tuna and swordfish) and `col` is `a-friend`
+This is not simple.
+
+### So let's try a friendlier example. What is the value of `(multirember&co a lat col)` where `a` is tuna
+### `lat` is () and `col` is `a-friend`
+True
+
+### What is the value of `(multirember&co a lat col)` where `a` is tuna `lat` is (tuna) and `col` is `a-friend`
+multirember&co asks `(eq? (car lat) 'tuna)` where `lat` is (tuna).
+Then it recurs on `()`.
+
+### What are the other arguments that `multirember&co` uses for the natural recursion?
+The first one is clearly tuna. The third argument is a new function.
+
+### What is the name of the third argument?
+`col`
+
+### Do you know what `col` stands for?
+The name `col` is short for "collector."
+A collector is sometimes called a "continuation."
+
+### Here is the new collector:
+```
+(define new-friend
+  (lambda (newlat seen)
+    (col
+      newlat
+      (cons (car lat) seen))))
+```
+### where `(car lat)` is tuna and `col` is `a-friend`
+### Can you write this definition differently?
+```
+(define new-friend
+  (lambda (newlat seen)
+    (a-friend
+      newlat
+      (cons 'tuna seen))
+  )
+)
+```
+
+### And now?
+`multirember&co` finds out that `(null? lat)` is true, which means that it uses the collector on two empty lists.
+
+### Which collector is this?
+`new-friend`
+
+### How does `a-friend` differ from `new-friend`
+`new-friend` uses `a-friend` on the empty list and the value of `(cons 'tuna '())`.
+
+### And what does the old collector do with such arguments?
+It answers `#f`, because its second argument is (tuna), which is not the empty list.
+
+### What is the value of `(multirember&co a lat a-friend)` where `a` is tuna and `lat` is (and tuna)
+This time around `multirember&co` recurs with yet another friend.
+```
+(define latest-friend
+  (lambda (newlat seen)
+    (a-friend (cons 'and newlat) seen)))
+```
+
+### And what is the value of this recursive use of `multirember&co`
+`#f`, since `(a-friend ls1 ls2)` where ls1 is `(and)` and `ls2` is `(tuna)` is `#f`.
+
+### What does `(multirember&co a lat f)` do?
+It looks at every atom of the `lat` to see whether it is `eq?` to `a`.
+Those atoms that are not are collected in one list `ls1`;
+the others for which the answer is true are collected in a second list `ls2`.
+Finally, it determines the value of `(f ls1 ls2)`.
+
+### Final question: What is the value of `(multirember&co 'tuna ls col) where
+### `ls` is (strawberries tuna and swordfish) and `col` is
+```
+(define last-friend
+  (lambda (x y)
+    (length x)))
+```
+3, since `x` is `(strawberries and swordfish)`

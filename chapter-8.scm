@@ -66,3 +66,41 @@
   )
 )
 
+(define multirember-f
+  (lambda (test?)
+    (lambda (a lat)
+      (cond
+        ((null? lat) '())
+        ((test? (car lat) a)
+          ((multirember-f test?) a (cdr lat)))
+        (else
+          (cons
+            (car lat)
+            ((multirember-f test?) a (cdr lat)))
+        )
+      )
+    )
+  )
+)
+
+(define multirember&co
+  (lambda (a lat col)
+    (cond
+      ((null? lat)
+        (col '() '()))
+      ((eq? (car lat) a)
+        (multirember&co
+          a
+          (cdr lat)
+          (lambda (newlat seen)
+            (col
+              newlat
+              (cons (car lat) seen)))))
+      (else
+        (multirember&co
+          a
+          (cdr lat)
+          (lambda (newlat seen)
+            (col
+              (cons (car lat) newlat)
+              seen)))))))
