@@ -598,3 +598,62 @@ Finally, it determines the value of `(f ls1 ls2)`.
     (length x)))
 ```
 3, since `x` is `(strawberries and swordfish)`
+
+### Here is an old friend.
+```
+(define multiinsertL
+  (lambda (new old lat)
+    (cond
+      ((null? lat) '())
+      ((eq? (car lat) old)
+        (cons new (cons old
+          (multiinsertL new old (cdr lat)))))
+      (else
+        (cons
+          (car lat)
+          (multiinsertL new old (cdr lat)))))))
+```
+### Do you also remember `multiinsertR`
+```
+(define multiinsertR
+  (lambda (new old lat)
+    (cond
+      ((null? lat) '())
+      ((eq? (car lat) old)
+        (cons
+          old
+          (cons
+            new
+            (multiinsertR new old (cdr lat)))))
+      (else
+        (cons
+          (car lat)
+          (multiinsertR new old (cdr lat)))))))
+```
+### Now try `multiinsertLR`
+```
+(define multiinsertLR
+  (define (new oldR oldL lat)
+    (cond
+      ((null? lat) '())
+      ((eq? (car lat) oldL)
+        (cons
+          new
+          (cons oldL (multiinsertLR new oldL oldR (cdr lat)))))
+      ((eq? (car lat) oldR)
+        (cons
+          oldR
+          (cons new (multiinsertLR new oldL oldR (cdr lat))))
+      )
+      (else
+        (cons
+          (car lat)
+          (multiinsertLR new oldL oldR (cdr lat)))
+      )
+    )
+  )
+)
+```
+
+### The function `multiinsertLR&co` is to `multiinsertLR` what `multirember&co` is to `multirember`
+It takes on more argument, which is `col` that is a collector function.
