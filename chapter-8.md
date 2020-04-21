@@ -657,3 +657,109 @@ Finally, it determines the value of `(f ls1 ls2)`.
 
 ### The function `multiinsertLR&co` is to `multiinsertLR` what `multirember&co` is to `multirember`
 It takes on more argument, which is `col` that is a collector function.
+
+### When `multiinsertLR&co` is done, it will use `col` on the new lat, on the number of `left` insertions
+### and the number of `right` insertions.
+### Can you write an outline of multiinsertLR&co
+```
+(define multiinsertLR&co
+  (lambda (new oldL oldR lat col)
+    (cond
+      ((null? lat) (col '() 0 0))
+      ((eq? (car lat) oldL)
+        (multiinsertLR&co
+          new
+          oldL
+          oldR
+          (cdr lat)
+          (lambda (newlat leftI rightI)
+            (...)
+          )
+        )
+      )
+      ((eq? (car lat) oldR)
+        (multiinsertLR&co
+          new
+          oldL
+          oldR
+          (cdr lat)
+          (lambda (newlat leftI rightI)
+            (...)
+          )
+        )
+      )
+      (else
+        (multiinsertLR&co
+          new
+          oldL
+          oldR
+          (cdr lat)
+          (lambda (newlat leftI rightI)
+            (...)
+          )
+        )
+      )
+    )
+  )
+)
+```
+
+### Why is `col` used on `'()` `0` and `0` when `(null? lat)` is true?
+Because the empty list has no occurrences of `oldL` or `oldR`
+
+### So what is the value of
+```
+(multiinsertLR&co 'cranberries 'fish 'chips '() col)
+```
+`(col '() 0 0)`
+
+### Is it true that `multiinsertLR&co` will use the new collector on three arguments when
+### `(car lat)` is equal to neither `oldL` nor `oldR`
+Yes, the first is the `lat` that `multiinsertLR` would have produced for `(cdr lat)`, `oldL`, and `oldR`.
+The second and third are the number of insertions that occurred to the left and right of `oldL` and `oldR`, respectively.
+
+### Is it true that `multiinsertLR&co` then uses the function `col` on `(cons (car lat) newlat)`
+### because it copies the list unless an `oldL` or an `oldR` appears?
+Yes.
+So we know what the new collector for the last case is:
+`(lambda (newlat L R) (col (cons (car lat) newlat) L R))`
+
+### Why are col's second and third arguments just `L` and `R`
+Because since there is no occurrence of `oldL` or `oldR` we don't need to increment `L` and `R`.
+
+### Here is what we have so far. And we have even thrown in an extra collector:
+```
+(define multiinsertLR&co
+  (lambda (new oldL oldR lat col)
+    (cond ((null? lat) (col '() 0 0))
+    ((eq? (car lat) oldL)
+      (multiinsertLR&co new oldL oldR (cdr lat)
+        (lambda (newlat L R)
+          (col (cons new (cons oldL newlat)) (add1 L) R))))
+    ((eq? (car lat) oldR)
+      (multiinsertLR€1co new oldL oldR (cdr lat)
+        (lambda (newlat L R) ... )))
+    (else
+      (multiinsertLR&co new oldL oldR (cdr lat)
+        (lambda (newlat L R)
+          (col (cons (car lat) newlat) L R)))))))
+```
+### Can you fill in the dots?
+```
+(define multiinsertLR&co
+  (lambda (new oldL oldR lat col)
+    (cond
+      ((null? lat) (col '() 0 0)
+      ((eq? (car lat) oldL)
+        (multiinsertLR&co new oldL oldR (cdr lat)
+          (lambda (newlat L R)
+            (col (cons new (cons oldL newlat)) (add1 L) R))))
+      ((eq? (car lat) oldR)
+        (multiinsertLR&co new oldL oldR (cdr lat)
+          (lambda (newlat L R)
+            (col (cons oldR (cons new newlat) L (add1 R))))))
+      (else
+        (multiinsertLR&co new oldL oldR (cdr lat)
+          (lambda (newlat L R)
+            (col (cons (car lat) newlat) L R))))))))
+```
