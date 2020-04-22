@@ -763,3 +763,102 @@ Because since there is no occurrence of `oldL` or `oldR` we don't need to increm
           (lambda (newlat L R)
             (col (cons (car lat) newlat) L R))))))))
 ```
+
+### What is the value of `(multiinsertLR&co new oldL oldR lat col)`
+### where `new` is salty `oldL` is fish `oldR` is chips and `lat` is (chips and fish or fish and chips)
+`(col '(chips salty and salty fish or salty fish and chips salty) 2 2)`
+
+### Do you remember what *-functions are?
+Yes, all *-functions work on lists that are either
+- empty,
+- an atom `consed` onto a list, or
+- a list `consed` onto a list.
+
+### Now write the function `evens-only*` which removes all odd numbers from a list of nested lists.
+### Here is `even?``
+```
+(define even?
+  (lambda (n)
+    (= (x (/ n 2) 2) n)
+  )
+)
+```
+```
+(define evens-only*
+  (lambda (l)
+    (cond
+      ((null? l) '())
+      ((atom? (car l))
+        (cond
+          ((even? (car l))
+            (cons (car l) (evens-only* (cdr l)))
+          )
+          (else
+            (evens-only* (cdr l))
+          )
+        )
+      )
+      (else
+        (cons (evens-only* (car l)) (evens-only* (cdr l)))
+      )
+    )
+  )
+)
+```
+
+### What is the value of `(evens-only* l)` where `l` is ((9 1 2 8) 3 10 ((9 9) 7 6) 2)
+`((2 8) 10 (() 6) 2)`
+
+### What is the sum of the odd numbers in `l` where `l` is ((9 1 2 8) 3 10 ((9 9) 7 6) 2)
+9 + 1 + 3 + 9 + 9 + 7 = 38
+
+### What is the product of the even numbers in `l` where `l` is ((9 1 2 8) 3 10 ((9 9) 7 6) 2)
+2 * 8 * 10 * 6 * 2 = 1920
+
+### Write the function `evens-only*&co`
+### It builds a nested list of even numbers by removing the odd ones from its argument and
+### simultaneously multiplies the even numbers and sums up the odd numbers that occur in its argument
+```
+(define evens-only*&co
+  (lambda (l col)
+    (cond
+      ((null? l) (col '() 1 0))
+      ((atom? (car l))
+        (cond
+          ((even? (car l))
+            (evens-only*&co
+              (cdr l)
+              (lambda (newl even odd)
+                (col (cons (car l) newl) (x even (car l)) odd)))
+          )
+          (else
+            (evens-only*&co
+              (cdr l)
+              (lambda (newl even odd)
+                (col newl even (+ odd (car l)))))
+          )
+        )
+      )
+      (else
+        (evens-only*&co
+          (car l)
+          (lambda (al ap as)
+            (evens-only*&co
+              (cdr l)
+              (lambda (dl dp ds)
+                (col (cons al dl) (x ap dp) (+ as ds)))))
+        )
+      )
+    )
+  )
+)
+```
+
+### What is the value of `(evens-only*&co l the-last-friend)` where `l` is ((9 1 2 8) 3 10 ((9 9) 7 6) 2)
+### and `the-last-friend` is defined as follows:
+```
+(define the-last-friend
+  (lambda (newl product sum)
+    (cons sum (cons product newl))))
+```
+`(38 1920 (2 8) 10 (() 6) 2)`
