@@ -328,3 +328,188 @@ Yes
 
 ### But didn't will-stop? predict just the opposite?
 Yup, we said that the value of `(will-stop? last-try)` was `#f`, which really means that `last-try` will not stop.
+
+### So we must have been wrong about `(will-stop? last-try)`
+That's correct. It must return `#t`, because `will-stop?` always gives an answer. We said it was total.
+
+### Fine. If `(will-stop? last-try)` is `#t` what is the value of `(last-try '())`
+Now we just need to determine the value of `(and #t (eternity '())`, which is the same as the value of `(eternity '())`.
+
+### What is the value of `(eternity '())`
+It doesn't have one since it doesn't stop.
+
+### But that means we were wrong again!
+True, since this time we said that `(will-stop? last-try)` was `#t`.
+
+### What do you think this means?
+We took a really close look at the two
+possible cases. If we can *define* `will-stop?`, then
+`(will-stop? last-try)` must yield either `#t` or `#f`.
+But it cannot-due to the very definition of what `will-stop?` is supposed to do.
+This must mean that `will-stop?` cannot be *defined*
+
+### Is this unique?
+Yes, it is. It makes `will-stop?` the first function that we can describe precisely but cannot *define* in our language.
+
+### Is there any way around this problem?
+No. Thank you, Alan M. Turing (1912-1954) and Kurt Godel (1906-1978).
+
+### What is `(define ... )`
+Its a call to the function `define`
+
+### Is this the function length
+```
+(define length
+  (lambda (l)
+    (cond
+      ((null? l) 0)
+      (else
+        (add1 (length (cdr l)))))))
+```
+Yep
+
+### What if we didn't have `(define ... )` anymore? Could we still define `length`
+I guess not.
+Without `(define ... )` nothing, and especially not the body of `length`, could refer to `length`
+
+###  What does this function do?
+```
+(lambda (l)
+  (cond
+    ((null? l) 0)
+    (else
+      (add1 (eternity (cdr l)))))))
+```
+It determines the length of the empty list and nothing else.
+
+### What happens when we use it on a non-empty list?
+It doesn't stop
+
+### What does it mean for this function that looks like `length`
+It's partial, it just won't give any answer for non-empty lists.
+
+### Suppose we could name this new function. What would be a good name?
+length0
+
+### How would you write a function that determines the length of lists that contain one or fewer items?
+```
+(define length1
+  (lambda
+    (cond
+      ((null? l) 0)
+      (else
+        (add1 (length0 (cdr l)))
+      )
+    )
+  )
+)
+```
+
+### Almost, but `(define ... )` doesn't work for `length0`
+So, replace length0 by its definition.
+```
+(define length1
+  (lambda
+    (cond
+      ((null? l) 0)
+      (else
+        (add1
+          ((lambda (l)
+            (cond
+              ((null? l) 0)
+              (else
+                (add1 (eternity (cdr l)))
+              ))
+            )
+          )
+        )
+      )
+    )
+  )
+)
+```
+
+### Is this the function that would determine the lenghts of lists that contain two or fewer items?
+```
+(lambda
+    (cond
+      ((null? l) 0)
+      (else
+        (add1
+          ((lambda (l)
+            (cond
+              ((null? l) 0)
+              (else
+                (add1
+                  ((lambda (l)
+                    (cond
+                      ((null? l) 0)
+                      (else
+                        (add1 (eternity (cdr l))))))
+                  (cdr l)
+                )
+            )
+          )
+        )
+      )
+    (cdr l)))))
+)
+```
+Yes, this is length2
+
+### Now, what do you think recursion is?
+What do you mean?
+
+### Well, we have seen how to determine the length of a list with no items, with no more than one item,
+### with no more than two items, and so on.
+### How could we get the function `length` back?
+If we could write an infinite function in the style of `length0`, `length1'`, `length2'` ... ,
+then we could write length-infinite, which would determine the length of all lists that we can make.
+
+### How long are the lists that we can make?
+Infinite
+
+### But we can't write an infinite function.
+### And we still have all these repetitions and patterns in these functions.
+### What do these patterns look like?
+All these programs contain a function that looks like length.
+Perhaps we should abstract out this function: see The Ninth Commandment.
+
+### We need a function that looks just like length but starts with `(lambda (length) ... )`.
+Do you mean this?
+```
+((lambda (length)
+  (lambda (l)
+    (cond
+      ((null? l) 0)
+      (else
+        (add1 (length (cdr l)))))))
+  eternity)
+```
+
+### Rewrite `length1` in the same style.
+```
+(
+  (lambda (f)
+    (lambda (l)
+      (cond
+        ((null? l) 0)
+        (else
+          (add1 (f (cdr l)))
+        )
+      )
+    )
+  )
+  (
+    (lambda (g)
+      (cond
+        ((null? l) 0)
+        (else
+          (add1 (g (cdr l)))
+        )
+      )
+    )
+    eternity
+  )
+)
+```
