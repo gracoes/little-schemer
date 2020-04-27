@@ -513,3 +513,373 @@ Do you mean this?
   )
 )
 ```
+
+### Do we have to use `length` to name the argument?
+Not really
+
+### How about length2
+```
+(
+  (lambda (length)
+    (lambda (l)
+      (cond
+        ((null? l) 0)
+        (else
+          (add 1 (length (cdr l)))
+        )
+      )
+    )
+  )
+  (
+    (lambda (length)
+      (lambda (l)
+        (cond
+          ((null? l) 0)
+          (else
+            (add 1 (length (cdr l)))
+          )
+        )
+      )
+    )
+    (
+      (lambda (length)
+        (lambda (l)
+          (cond
+            ((null? l) 0)
+            (else
+              (add 1 (length (cdr l)))
+            )
+          )
+        )
+      )
+    eternity
+    )
+  )
+)
+```
+
+### Close, but there are still repetitions.
+Let's get rid of them
+
+### Where should we start?
+Naming the function that takes `length` as an argument and returns a function that looks like `length`
+
+###  What's a good name for this function?
+`mk-length`
+
+### Okay, do this to `length0`
+```
+(
+  (lambda (mk-length)
+    (mk-length eternity)
+  )
+  (lambda (length)
+    (cond
+      ((null? l) 0)
+      (else
+        (add1 (length (cdr l)))
+      )
+    )
+  )
+)
+```
+
+### Is this `length1?`
+```
+(
+  (lambda (mk-length)
+    (mk-length
+      (mk-length eternity)))
+  (lambda (length)
+    (lambda (l)
+    (cond
+      ((null?l) 0)
+      (else (add1 (length (cdr l))))))))
+```
+Yup
+
+### Can you write `length3` in this style?
+```
+(
+  (lambda (mk-length)
+    (mk-length
+      (mk-length
+        (mk-length
+          (mk-length eternity)
+        )
+      )
+    )
+  )
+  (lambda (length)
+    (lambda (l)
+      (cond
+        ((null? l) 0)
+        (add1 (length (cdr l)))
+      )
+    )
+  )
+)
+```
+
+### What is recursion like?
+It is like an infinite tower of applications of `mk-length` to an arbitrary function.
+
+### Do we really need an infinite tower?
+Not really of course. Everytime we use length we only need a finite number, but we never know how many.
+
+### Could we guess how many we need?
+Sure, but we may not guess a large enough number.
+
+### When do we find out that we didn't guess a large enough number?
+When we apply the function `eternity` that is passed to the innermost `mk-length`.
+
+### What if we could create another application of mk-length to eternity at this point?
+That would only postpone the problem by one, and besides, how could we do that?
+
+### Well, since nobody cares what function we pass to `mk-length` we could pass it `mk-length` initially.
+That's the right idea.
+And then we invoke `mk-length` on eternity and the result of this on the `cdr`
+so that we get one more piece of the tower.
+
+### Then is this still `length0`
+```
+(
+  (lambda (mk-length)
+    (mk-length mk-length))
+  (lambda (length)
+    (lambda (l)
+      (cond
+        ((null? l) 0)
+        (else
+          (add1 (length (cdr l)))
+        )
+      )
+    )
+  )
+)
+```
+Yes, we could even use `mk-length` instead of `length`.
+
+### Now that `mk-length` is passed to `mk-length` can we use the argument to create an additional recursive use?
+Yes, when we apply `mk-length` once, we get `length1`
+```
+(
+  (lambda (mk-length)
+    (mk-length mk-length)
+  )
+  (lambda (mk-length)
+    (lambda (l)
+      (cond
+        ((null? l) 0)
+        (else
+          (add1 ((mk-length eternity) (cdr l))
+        )
+      )
+    )
+  )
+)
+```
+
+### What is the value of
+```
+(
+  (
+    (lambda (mk-length)
+      (mk-length mk-length)
+    )
+    (lambda (mk-length)
+      (lambda (l)
+        (cond
+          ((null? l) 0)
+          (else
+            (add1 ((mk-length eternity) (cdr l)))
+          )
+        )
+      )
+    )
+  )
+  l
+)
+```
+### where `l` is (apples)
+1
+
+### Could we do this more than once?
+Yup, we could do it infinite times
+
+### What would you call this function?
+```
+(
+  (lambda (mk-length)
+    (mk-length mk-length)
+  )
+  (lambda (mk-length)
+    (lambda (l)
+      (cond
+        ((null? l) 0)
+        (else
+          (add1 ((mk-length mk-length) (cdr l))))))))
+```
+It's `length`
+
+### How does it work?
+It keeps passing `mk-length` to itself until `l` is the empty list.
+
+### One problem is left: it no longer contains the function that looks like length
+### `(add1 (*(mk-length mk-length)* (cdr l)))`
+We could extract this new application of `mk-length` to itself and call it `length`.
+Like this,
+```
+(
+  (lambda (mk-length)
+    (mk-length mk-length)
+  )
+  (lambda (mk-length)
+    (
+      (lambda (length)
+        (lambda (l)
+          (cond
+            ((null? l) 0)
+            (else
+              (add1 (length (cdr l)))
+            )
+          )
+        )
+      )
+    )
+    (mk-lenght mk-length)
+  )
+)
+```
+
+### What is the value of
+```
+(
+  (lambda (mk-length)
+    (mk-length mk-length)
+  )
+  (lambda (mk-length)
+    (
+      (lambda (length)
+        (lambda (l)
+          (cond
+            ((null? l) 0)
+            (else
+              (add1 (length (cdr l)))
+            )
+          )
+        )
+      )
+    )
+    (mk-lenght mk-length)
+  )
+)
+```
+### where `l` is (apples)
+It should be 1
+
+### First need the value of
+```
+(
+  (lambda (mk-length)
+    (mk-length mk-length)
+  )
+  (lambda (mk-length)
+    (
+      (lambda (length)
+        (lambda (l)
+          (cond
+            ((null? l) 0)
+            (else
+              (add1 (length (cdr l)))
+            )
+          )
+        )
+      )
+    )
+    (lambda (mk-length)
+      (
+        (lambda (length)
+          (lambda (l)
+            (cond
+              ((null? l) 0)
+              (else
+                (add1 (length (cdrl l)))
+              )
+            )
+          )
+        )
+      )
+      (mk-length mk-length)
+    )
+  )
+)
+```
+### since that is the value with the result of `(mk-length mk-length)`
+Makes sense
+
+### So we really need to know the value of
+```
+(
+  (lambda (mk-length)
+    (mk-length mk-length)
+  )
+  (lambda (mk-length)
+    (
+      (lambda (length)
+        (lambda (l)
+          (cond
+            ((null? l) 0)
+            (else
+              (add1 (length (cdr l)))
+            )
+          )
+        )
+      )
+    )
+    (lambda (mk-length)
+      (
+        (lambda (length)
+          (lambda (l)
+            (cond
+              ((null? l) 0)
+              (else
+                (add1 (length (cdrl l)))
+              )
+            )
+          )
+        )
+      )
+        (lambda (mk-length)
+          (
+            (lambda (length)
+              (lambda (l)
+                (cond
+                  ((null? l) 0)
+                  (else
+                    (add1 (length (cdrl l)))
+                  )
+                )
+              )
+            )
+          )
+        (mk-length mk-length)
+      )
+    )
+  )
+)
+```
+It seems it will never end...
+
+### Yes, there is no end to it. Why?
+Because the definition needs to take into account that the list can be infinite
+so we just keep applying `mk-length` to itself again and again and again ...
+
+### Is this strange?
+A bit.
+It is because mk-length used to return a function when we applied it to an argument.
+Indeed, it didn't matter what we applied it to.
+
+### But now that we have extracted `(mk-length mk-length)` from the function that makes `length`
+### it does not return a function anymore.
+No it doesn't. So what do we do?
