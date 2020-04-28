@@ -883,3 +883,116 @@ Indeed, it didn't matter what we applied it to.
 ### But now that we have extracted `(mk-length mk-length)` from the function that makes `length`
 ### it does not return a function anymore.
 No it doesn't. So what do we do?
+
+### Turn the application of `mk-length` to itself in our last correct version of `length` into a function:
+```
+(
+  (lambda (mk-length)
+    (mk-length mk-length)
+  )
+  (lambda (mk-length)
+    (lambda (l)
+      (cond
+        ((null? l) 0)
+        (else
+          (add1 ((mk-length mk-length) (cdr l))))))))
+```
+How?
+
+### Here is a different way. If `f` is a function of one argument, is `(lambda (x) (f x))` a function of one argument?
+Yep
+
+### If `(mk-length mk-length)` returns a function of one argument, does
+```
+(lambda (x)
+  ((mk-length mk-length) x))
+```
+### return a function of one argument?
+Yes, actually, `(lambda (x) ((mk-length mk-length) x))` is a function!
+
+### Okay, let's do this to the application of `mk-length` to itself.
+```
+(
+  (lambda (mk-length)
+    (mk-length mk-length)
+  )
+  (lambda (mk-length)
+    (lambda (l)
+      (cond
+        ((null? l) 0)
+        (else
+          (add1
+            (
+              (lambda (x) ((mk-length mk-length) x))
+              (cdr l))))))))
+```
+
+### Move out the new function so that we get length back.
+```
+(
+  (lambda (mk-length)
+    (mk-length mk-length)
+  )
+  (lambda (mk-length)
+    (lambda (length)
+      (lambda (l)
+        (cond
+          ((null? l) 0)
+          (else
+            (add1 (length (cdr l))))))))
+  (lambda (x) ((mk-length mk-length) x))
+)
+```
+
+### Can we extract the innermost function in that looks like `length` and give it a name?
+Yes, it does not depend on `mk-length` at all!
+
+### Is this the right function?
+```
+((lambda (le)
+  ((lambda (mk-length)
+    (mk-length mk-length))
+  (lambda (mk-length)
+    (le (lambda (x)
+          ((mk-length mk-length) x))))))
+(lambda (length)
+  (lambda (l)
+    (cond
+      ((null? l) 0)
+      (else (add1 (length (cdr l))))))))
+```
+I guess
+
+### What did we actually get back?
+We extracted the original function `mk-length`.
+
+### Let's separate the function that makes `length` from the function that looks like `length`
+```
+(lambda (le)
+  ((lambda (mk-length)
+    (mk-length mk-length))
+  (lambda (mk-length)
+    (le (lambda (x)
+          ((mk-length mk-length) x))))))
+```
+
+### Does this function have a name?
+Yes, it is called the applicative-order `Y` combinator.
+```
+(define Y
+  (lambda (le)
+    (
+      (lambda (f) (f f))
+      (lambda (f)
+        (le (lambda (x) ((f f) x)))
+      )
+    )
+  )
+)
+```
+
+### Does (define ... ) work again
+Sure, now that we know what recursion is.
+
+### Do you now know why `Y` works?
+Read this chapter again and you will
