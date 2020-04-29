@@ -144,3 +144,450 @@ a
 
 ### What is (value e) where `e` is (quote (car (quote (a b c))))
 (car '(a b c))
+
+###  What is `(value e)` where `e` is (add1 6)
+7
+
+### What is `(value e)` where `e` is 6
+6
+
+### What is `(value e)` where `e` is (quote nothing)
+nothing
+
+### What is `(value e)` where `e` is nothing
+nothing has no value
+
+### What is `(value e)` where `e` is
+```
+(
+  (lambda (nothing)
+    (cons nothing (quote ())))
+  (quote (from nothing comes something))
+)
+```
+`((from nothing comes something))`
+
+### ### What is `(value e)` where `e` is
+```
+(
+  (lambda (nothing)
+    (cond
+      (nothing (quote something))
+      (else
+        (quote nothing)
+      )
+    )
+  )
+  #t
+)
+```
+'something
+
+### What is the type of `e` where `e` is 6
+*const
+
+### What is the type of `e` where `e` is #f
+*const
+
+###  What is `(value e)` where `e` is #f
+#f
+
+### What is the type of `e` where `e` is `cons`
+*const
+
+### What is the type of `e` where `e` is `car`
+(primitive car)
+
+### What is the type of `e` where `e` is (quote nothing)
+*quote
+
+### What is the type of `e` where `e` is nothing
+*identifier
+
+### What is the type of `e` where `e` is (lambda (x y) (cons x y))
+*lambda
+
+### What is the type of `e` where `e` is
+```
+(
+  (lambda (nothing)
+    (cond
+      (nothing (quote something))
+      (else
+        (quote nothing)
+      )
+    )
+  )
+  #t
+)
+```
+*application
+
+### What is the type of `e` where `e` is
+```
+(cond
+  (nothing (quote something))
+  (else
+    (quote nothing)
+  ))
+```
+*cond
+
+### How many types do you think there are?
+At least 6:
+- *const
+- *quote
+- *identifier
+- *lambda
+- *cond
+- *application.
+
+### How do you think we should represent types?
+We choose functions. We call these functions *actions*
+
+### If *actions* are functions that do "the right thing" when applied to the appropriate type of expression,
+## what should `value` do?
+You guessed it. It would have to find out the type of expression it was passed and then use the associated *action*.
+
+### Do you remember `atom-to-function` from chapter 8?
+We found `atom-to-function` useful when we rewrote `value` for numbered expresssions.
+
+### Below is a function that produces the correct *action* (or function) for each possible S-expression:
+```
+(define expression-to-action
+  (lambda (e)
+    (cond
+      ((atom? e) (atom-to-action e))
+      (else
+        (list-to-action e)
+      )
+    )
+  )
+)
+```
+### Define the function atom-to-action
+```
+(define atom-to-action
+  (lambda (a)
+    (cond
+      ((number? a) *const)
+      ((or (eq? a #t) (eq? a #f)) *const)
+      ((eq? a 'cons) *const)
+      ((eq? a 'car) *const)
+      ((eq? a 'cdr) *const)
+      ((eq? a 'null?) *const)
+      ((eq? a 'eq?) *const)
+      ((eq? a 'atom?) *const)
+      ((eq? a 'zero?) *const)
+      ((eq? a 'add1?) *const)
+      ((eq? a 'sub1?) *const)
+      ((eq? a 'number?) *const)
+      (else *identifier)
+    )
+  )
+)
+```
+
+### Now define the help function list-to-action
+```
+(define list-to-action
+  (lambda (l)
+    (cond
+      ((atom? (car l))
+        (cond
+          ((eq? (car l) 'quote) *quote)
+          ((eq? (car l) 'lambda) *lambda)
+          ((eq? (car l) 'cond) *cond)
+          (else *application)
+        )
+      )
+      (else *application)
+    )
+  )
+)
+```
+
+### Assuming that `expression-to-action` works, we can use it to define `value` and `meaning`
+```
+(define value
+  (lambda (e)
+    (meaning e (quote ()))))
+
+(define meaning
+  (lambda (e table)
+    ((expression-to-action e) e table)))
+```
+### What is (quote ()) in the definition of `value`
+It is the empty table. The function `value`, together with all the functions it uses, is called an interpreter.
+
+### How many arguments should actions take according to the above?
+Two, the expression `e` and a `table`.
+
+### Here is the action for constants.
+```
+(define *const
+  (lambda (e table)
+    (cond
+      ((number? e) e)
+      ((eq? e #t) #t)
+      ((eq? e #f) #f)
+      (else (build (quote primitive) e)))))
+```
+### Is this correct?
+Yes, for numbers, it just returns the expression, and this is all we have to do for 0,1,2, ...
+For `#t`, it returns true.
+For `#f`, it returns false.
+And all other atoms of constant type represent primitives.
+
+### Here is the action for `*quote`
+```
+(define *quote
+  (lambda (e table)
+    (text-of e)
+  )
+)
+```
+### Define the help-function `text-of`
+`(define text-of second)`
+
+### Have we used the table yet?
+Nope, but we will in a moment.
+
+### Why do we need the table?
+To remember the values of identifiers.
+
+### Given that the table contains the values of identifiers, write the action `*identifier`
+```
+(define *identifier
+  (lambda (e table)
+    (lookup-in-table e table initial-table)
+  )
+)
+```
+
+### Here is `initial-table`
+```
+(define initial-table
+  (lambda (name)
+    (car (quote ()))))
+```
+### When is it used?
+Let's hope never. Why?
+It would return no answer since we can't obtain `car` of the empty list
+
+### What is the `value` of (lambda (x) x)
+We don't know yet, but we know that it must be the representation of a non-primitive function.
+
+### How are non-primitive functions different from primitives?
+We know what primitives do; non-primitives are defined by their arguments and their function bodies.
+
+### So when we want to use a non-primitive we need to remember its formal arguments and its function body.
+Seems correct. Fortunately this is just the `cdr` of a lambda expression
+
+### And what else do we need to remember?
+We will also put the table in, just in case we might need it later.
+
+### And how do we represent this?
+In a list, of course
+
+### Here is the action *lambda
+```
+(define *lambda
+  (lambda (e table)
+    (build (quote non-primitive) (cons table (cdr e)))))
+```
+
+### What is `(meaning e table)` where `e` is (lambda (x) (cons x y)) and `table` is (((y z) ((8) 9)))
+(non-primitive ( (((y z) ((8) 9)) (x) (cons x y) ))
+
+### It is probably a good idea to define some help functions for getting back the parts in this three element list (i.e., the table, the formal arguments, and the body).
+### Write `table-of` `formals-of` and `body-of``
+```
+(define table-of
+  (lambda (e)
+    (car (e))
+  )
+)
+
+(define formals-of
+  (lambda (e)
+    (car (cdr e))
+  )
+)
+
+(define body-of
+  (lambda (e)
+    (car (cdr (cdr e)))
+  )
+)
+```
+
+### Describe (cond ... ) in your own words.
+It is a special form that takes any number of *cond*-lines. It considers each line in turn.
+If the question part on the left is false, it looks at the rest of the lines.
+Otherwise it proceeds to answer the right part.
+If it sees an *else*-line, it treats that *cond*-line as if its question part were true.
+
+###  Here is the function `evcon` that does what we just said in words:
+```
+(define evcon
+  (lambda (lines table)
+    (cond
+      ((else? (question-of (car lines)))
+        (meaning (answer-of (car lines)) table)
+      )
+      ((meaning (question-of (car lines)) table)
+        (meaning (answer-of (car lines)) table)
+      )
+      (else (evcon (cdr lines) table)))))
+```
+### Write else? and the help functions question-of and answer-of
+```
+(define else?
+  (lambda (e)
+    (cond
+      ((atom? e) (eq? e 'else))
+      (else #f)
+    )
+  )
+)
+
+(define question-of
+  (lambda (line)
+    (car line)
+  )
+)
+
+(define answer-of
+  (lambda (line)
+    (car (cdr line))
+  )
+)
+```
+
+### Didn't we violate The First Commandment?
+Yes, we don't ask `(null? lines)`, so one of the questions in every *cond* better be true.
+
+### Now use the function `evcon` to write the *cond action.
+```
+(define *cond
+  (lambda (e table)
+    (evcon (cond-lines-of e) table)
+  )
+)
+
+(define cond-lines-of cdr)
+```
+
+### Aren't these help functions useful?
+They sure are man.
+
+### Do you understand *cond now?
+A little bit
+
+### How can you become familiar with it?
+The best way is to try an example. A good one is:
+`(*cond e table)`
+where
+`e` is (cond (coffee klatsch) (else party))
+and
+`table` is ( ((coffee) (#t)) ((klatsch party) (5 (6))) ).
+<=>
+```
+(cond
+  (coffee klatsh)
+  (else party)
+)
+```
+Answer is (5 (6))
+
+###  Have we seen how the table gets used?
+Yes, `*lambda` and `*identifier` use it.
+
+### But how do the identifiers get into the table?
+In the only action we have not defined: `*application`
+
+### How is an application represented?
+An application is a list of expressions whose `car` position contains an expression whose value is a function.
+
+### How does an application differ from a special form, like (and ... ) (or ... ) or (cond ... )
+An application must always determine the meaning of all its arguments.
+
+### Before we can apply a function, do we have to get the meaning of all of its arguments?
+Yes
+
+### Write a function `evlis` that takes a list of (representations of) arguments and a table, and returns a list composed of the meaning of each argument.
+```
+(define evlis
+  (lambda (l table)
+    (cond
+      ((null? l) '())
+      (else
+        (cons
+          (meaning (car l) table)
+          (evlis (cdr l) table))
+      )
+    )
+  )
+)
+```
+
+### What else do we need before we can determine the meaning of an application?
+We need to find out what its `function-of` means.
+
+### And what then?
+Apply its `function-of` to the meaning of the arguments
+
+### Here is `*application`
+```
+(define *application
+  (lambda (e table)
+    (apply
+      (meaning (function-of e) table)
+      (evlis (arguments-of e) table))))
+```
+### Is it correct?
+Of course. We just have to define `apply`, `function-of`, and `arguments-of` correctly.
+
+### Write `function-of` and `arguments-of`
+```
+(define function-of car)
+(define arguments-of cdr)
+```
+
+### How many different kinds of functions are there?
+Primitive and non-primitive
+
+### What are the two representations of functions?
+(primitive primitive-name) and (non-primitive (table formals body))
+The list (table formals body) is called a closure record.
+
+### Write primitive? and non-primitive?
+```
+(define primitive?
+  (lambda (l)
+    (eq? (first l) 'primitive)
+  )
+)
+
+(define non-primitive?
+  (lambda (l)
+    (eq? (first l) 'non-primitive)
+  )
+)
+```
+
+### Now we can write the function `apply`
+```
+(define apply
+  (lambda (f args)
+    (cond
+      ((primitive? f)
+        (apply-primitive (second f) args)
+      ((non-primitive? f)
+        (apply-closure (second f) args))
+    )
+  )
+)
+```
+
