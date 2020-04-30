@@ -591,3 +591,120 @@ The list (table formals body) is called a closure record.
 )
 ```
 
+### Define `apply-primitive`
+```
+(define :atom?
+  (lambda (x)
+    (cond
+      ((null? x) #f)
+      ((atom? x) #t)
+      ((eq? (car x) 'primitive) #t)
+      ((eq? (car x) 'non-primitive) #t)
+      (else #f))))
+
+(define apply-primitive
+  (lambda (name vals)
+    (cond
+      ((eq? name 'cons)
+        (cons (first vals) (second vals)))
+      ((eq? name 'car)
+        (car (first vals)))
+      ((eq? name 'cdr)
+        (cdr (first vals)))
+      ((eq? name 'null?)
+        (null? (first vals)))
+      ((eq? name 'eq?)
+        (eq? (first vals) (second vals)))
+      ((eq? name ':atom?)
+        (atom? (first vals)))
+      ((eq? name 'zero?)
+        (zero? (first vals)))
+      ((eq? name 'add1)
+        (add1 (first vals)))
+      ((eq? name 'sub1)
+        (sub1 (first vals)))
+      ((eq? name 'number?)
+        (number? (first vals)))
+    )
+  )
+)
+```
+
+### Is apply-closure the only function left?
+Yep and `apply-closure` must extend table
+
+### How could we find the result of (f a b) where `f` is (lambda (x y) (cons x y)) `a` is 1 and `b` is (2)
+That's tricky. But we know what to do to find the meaning of (cons x y) where table is (((x y) (1 (2)))).
+
+### Why can we do this?
+Here, we don't need to `apply-closure`
+
+### Can you generalize the last two steps?
+Applying a non-primitive function (a closure) to a list of values is the same as finding the meaning of the closure's body with its table extended by an entry of the form `(formals values)`
+In this entry, `formals` is the `formals` of the closure and `values` is the result of `evlis`.
+
+### Have you followed all this?
+If not, here is the definition of `apply-closure`.
+```
+(define apply-closure
+  (lambda (closure vals)
+    (meaning
+      (body-of closure)
+      (extend-table (new-entry (formals-of closure) vals) (table-of closure)))))
+```
+
+### This is a complicated function and it deserves an example.
+In the following, `closure` is ( (((u v w) (1 2 3)) ((x y z) (4 5 6))) (x y) (cons z x) )
+and `vals` is ((a b c) (d e f))
+### What will be the new arguments of `meaning`
+`body-of` => (cons z x)
+`formals-of` => (x y)
+`table-of` => (((u v w) (1 2 3)) ((x y z) (4 5 6)))
+`extend-table` => (((x y) ((a b c) (d e f))) ((u v w) (1 2 3)) ((x y z) (4 5 6)))
+
+###  What is the meaning of (cons z x) where `z` is 6 and `x` is (a b c)
+The same as `(meaning '(cons z x) '(((x y) ((a b c) (d e f))) ((u v w) (1 2 3)) ((x y z) (4 5 6))))`
+
+### Let's find the meaning of all the arguments. What is `(evlis args table)`
+### where `args` is (z x) and `table` is (((x y) ((a b c) (d e f))) ((u v w) (1 2 3)) ((x y z) (4 5 6)))
+We need to find both `(meaning 'z table)` and `(meaning 'x table)`
+
+### What is the (meaning e table) where `e` is z
+6, by using `*identifier`
+
+### What is (meaning e table) where `e` is x
+(a b c), by using `*identifier`
+
+### So, what is the result of evlis
+(cons 6 ((a b c))) => (6 (a b c))
+
+### What is (meaning e table) where `e` is cons
+(primitive cons), by using `*const`.
+
+### We are now ready to (apply fun vals) where `fun` is (primitive cons) and `vals` is (6 (a b c))
+### Which path should we take?
+The `apply-primitive` path
+
+### Which cond-line is chosen for (apply-primitive name vals) where `name` is cons and `vals` is (6 (a b c))
+The first cond-line
+
+### Are we finished now?
+Pretty much
+
+### But what about (define ... )
+It isn't needed because recursion can be obtained from the Y combinator.
+
+### It isn't needed because recursion can be obtained from the Y combinator.
+Yes, but see *The Seasoned Schemer*
+
+### Does that mean we can run the interpreter on the interpreter if we do the transformation with the Y combinator?
+Yes, but don't bother
+
+### What makes `value` unusual?
+It sees representations of expressions.
+
+### Should `will-stop?` see representations of expressions?
+That may help a lot.
+
+### Does it help?
+No, don't bother-we can play the same game again. We would be able to define a function like `last-try?` that will show that we cannot define the new and improved `will-stop`?
